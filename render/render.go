@@ -51,7 +51,7 @@ func (c *Render) Page(w http.ResponseWriter, r *http.Request, view string, varia
 }
 
 func (c *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, data interface{}) error {
-	tmpl, err := template.ParseFiles(fmt.Sprintf("%s/views/%s.go.tmpl", c.RootPath, view))
+	tmpl, err := template.ParseFiles(fmt.Sprintf("%s/views/%s.page.go.tmpl", c.RootPath, view))
 	if err != nil {
 		return err
 	}

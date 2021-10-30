@@ -22,7 +22,7 @@ var pageData = []struct {
 	errorMessage  string
 }{
 	// go templates
-	{"go_page", "go", "home2", false, "error rendering go template"},
+	{"go_page", "go", "home", false, "error rendering go template"},
 	{"go_page_no_template", "go", "no-file", true, "no error rendering non-existent template when one is expected"},
 
 	// jet templates

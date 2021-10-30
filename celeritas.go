@@ -108,6 +108,10 @@ func (c *Celeritas) New(rootPath string) error {
 			domain:   os.Getenv("COOKIE_DOMAIN"),
 		},
 		sessionType: os.Getenv("SESSION_TYPE"),
+		database: databaseConfig{
+			dsn:      c.BuildDSN(),
+			database: os.Getenv("DATABAS_TYPE"),
+		},
 	}
 
 	// create a session
@@ -156,6 +160,8 @@ func (c *Celeritas) ListenAndServe() {
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
 	}
+
+	defer c.DB.Pool.Close()
 
 	c.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
 	err := srv.ListenAndServe()

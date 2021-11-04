@@ -21,7 +21,15 @@ func doMake(arg2, arg3 string) error {
 		downFile := cel.RootPath + "/migrations" + fileName + "." + dbType + ".down.sql"
 
 		// create temlates for migrations
+		err := copyFileFromTemplate("templates/migrations/migration."+dbType+".up.sql", upFile)
+		if err != nil {
+			exitGraceFully(err)
+		}
 
+		err = copyFileFromTemplate("templates/migrations/migration."+dbType+".down.sql", downFile)
+		if err != nil {
+			exitGraceFully(err)
+		}
 	}
 
 	return nil

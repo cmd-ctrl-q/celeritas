@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"os"
 
 	"github.com/cmd-ctrl-q/celeritas"
@@ -14,6 +13,7 @@ const version = "1.0.0"
 var cel celeritas.Celeritas
 
 func main() {
+	var message string
 	// get command line args
 	arg1, arg2, arg3, err := validateInput()
 	if err != nil {
@@ -27,6 +27,16 @@ func main() {
 		showHelp()
 	case "version":
 		color.Yellow("Application version: " + version)
+	case "migrate":
+		if arg2 == "" {
+			// assume up migration
+			arg2 = "up"
+		}
+		err = doMigrate(arg2, arg3)
+		if err != nil {
+			exitGraceFully(err)
+		}
+		message = "Migrations complete!"
 	case "make":
 		if arg2 == "" {
 			exitGraceFully(errors.New("make requires a subcommand: (migration|model|handler)"))
@@ -36,8 +46,10 @@ func main() {
 			exitGraceFully(err)
 		}
 	default:
-		log.Println(arg2, arg3)
+		showHelp()
 	}
+
+	exitGraceFully(nil, message)
 }
 
 func validateInput() (string, string, string, error) {

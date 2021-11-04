@@ -20,6 +20,8 @@ func main() {
 		exitGraceFully(err)
 	}
 
+	setup()
+
 	switch arg1 {
 	case "help":
 		showHelp()

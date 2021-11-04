@@ -17,8 +17,8 @@ func doMake(arg2, arg3 string) error {
 
 		fileName := fmt.Sprintf("%d_%s", time.Now().UnixMicro(), arg3)
 
-		upFile := cel.RootPath + "/migrations" + fileName + "." + dbType + ".up.sql"
-		downFile := cel.RootPath + "/migrations" + fileName + "." + dbType + ".down.sql"
+		upFile := cel.RootPath + "/migrations/" + fileName + "." + dbType + ".up.sql"
+		downFile := cel.RootPath + "/migrations/" + fileName + "." + dbType + ".down.sql"
 
 		// create temlates for migrations
 		err := copyFileFromTemplate("templates/migrations/migration."+dbType+".up.sql", upFile)

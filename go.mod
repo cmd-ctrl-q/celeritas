@@ -12,6 +12,8 @@ require (
 	github.com/joho/godotenv v1.4.0
 )
 
+require github.com/iancoleman/strcase v0.2.0 // indirect
+
 require (
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/go-sql-driver/mysql v1.6.0

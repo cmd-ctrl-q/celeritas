@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 func doAuth() error {
@@ -12,8 +13,6 @@ func doAuth() error {
 	fileName := fmt.Sprintf("%d_create_auth_tables", time.Now().UnixMicro())
 	upFile := cel.RootPath + "/migrations/" + fileName + ".up.sql"
 	downFile := cel.RootPath + "/migrations/" + fileName + ".down.sql"
-
-	log.Println(dbType, upFile, downFile)
 
 	// create up migration
 	err := copyFileFromTemplate("templates/migrations/auth_tables."+dbType+".sql", upFile)
@@ -33,7 +32,7 @@ func doAuth() error {
 		exitGraceFully(err)
 	}
 
-	// copy files over
+	// copy over auth files (user, token)
 	err = copyFileFromTemplate("templates/data/user.go.txt", cel.RootPath+"/data/user.go")
 	if err != nil {
 		exitGraceFully(err)
@@ -43,6 +42,23 @@ func doAuth() error {
 	if err != nil {
 		exitGraceFully(err)
 	}
+
+	// copy over middleware
+	err = copyFileFromTemplate("templates/middleware/auth.go.txt", cel.RootPath+"/middleware/auth.go")
+	if err != nil {
+		exitGraceFully(err)
+	}
+
+	err = copyFileFromTemplate("templates/middleware/auth-token.go.txt", cel.RootPath+"/middleware/auth-token.go")
+	if err != nil {
+		exitGraceFully(err)
+	}
+
+	color.Yellow("  - users, tokens, and remember_tokens migrations created and executed")
+	color.Yellow("  - user and token models created")
+	color.Yellow("  - auth middleware created")
+	color.Yellow("")
+	color.Yellow("Don't forget to add user and token models in data/models.go, and to add appropriate middleware to your routes")
 
 	return nil
 }

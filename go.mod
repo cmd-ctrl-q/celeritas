@@ -19,6 +19,8 @@ require (
 
 require (
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
+	github.com/alexedwards/scs/mysqlstore v0.0.0-20211102093144-4fbbc167f2c1
+	github.com/alexedwards/scs/postgresstore v0.0.0-20211102093144-4fbbc167f2c1
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-migrate/migrate/v4 v4.15.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect

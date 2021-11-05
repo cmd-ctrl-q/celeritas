@@ -65,5 +65,6 @@ func showHelp() {
 	migrate down 		- reverses the most receive migration
 	migrate reset 		- runs all down migrations in reverse order, and then all up migrations
 	make migration <name>	- creates two new up and down migrations in the migrations folder
+	make auth 		- creates user and token migrations and copies users and tokens models to app 
 	`)
 }

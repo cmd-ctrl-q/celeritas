@@ -22,7 +22,7 @@ func doAuth() error {
 	}
 
 	// create down migration
-	err = copyDataToFile([]byte("drop table if exists users cascade"), downFile)
+	err = copyDataToFile([]byte("drop table if exists users cascade; drop table if exists tokens cascade; drop table if exists remember_tokens cascade;"), downFile)
 	if err != nil {
 		exitGraceFully(err)
 	}
@@ -34,6 +34,15 @@ func doAuth() error {
 	}
 
 	// copy files over
+	err = copyFileFromTemplate("templates/data/user.go.txt", cel.RootPath+"/data/user.go")
+	if err != nil {
+		exitGraceFully(err)
+	}
+
+	err = copyFileFromTemplate("templates/data/token.go.txt", cel.RootPath+"/data/token.go")
+	if err != nil {
+		exitGraceFully(err)
+	}
 
 	return nil
 }

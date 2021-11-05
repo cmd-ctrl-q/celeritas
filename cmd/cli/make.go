@@ -30,6 +30,11 @@ func doMake(arg2, arg3 string) error {
 		if err != nil {
 			exitGraceFully(err)
 		}
+	case "auth":
+		err := doAuth()
+		if err != nil {
+			exitGraceFully(err)
+		}
 	}
 
 	return nil

@@ -12,7 +12,10 @@ require (
 	github.com/joho/godotenv v1.4.0
 )
 
-require github.com/iancoleman/strcase v0.2.0 // indirect
+require (
+	github.com/gertd/go-pluralize v0.1.7 // indirect
+	github.com/iancoleman/strcase v0.2.0 // indirect
+)
 
 require (
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect

@@ -110,7 +110,7 @@ func (c *Celeritas) New(rootPath string) error {
 		sessionType: os.Getenv("SESSION_TYPE"),
 		database: databaseConfig{
 			dsn:      c.BuildDSN(),
-			database: os.Getenv("DATABAS_TYPE"),
+			database: os.Getenv("DATABASE_TYPE"),
 		},
 	}
 

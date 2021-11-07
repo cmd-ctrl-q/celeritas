@@ -37,7 +37,8 @@ type Celeritas struct {
 	JetViews *jet.Set
 
 	// config shoud only be used in the celeritas package
-	config config
+	config        config
+	EncryptionKey string
 }
 
 type config struct {
@@ -125,6 +126,7 @@ func (c *Celeritas) New(rootPath string) error {
 	}
 
 	c.Session = sess.InitSession()
+	c.EncryptionKey = os.Getenv("KEY")
 
 	var views = jet.NewSet(
 		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),

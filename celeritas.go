@@ -37,7 +37,8 @@ type Celeritas struct {
 	JetViews *jet.Set
 
 	// config shoud only be used in the celeritas package
-	config        config
+	config config
+	// Encryption Encryption
 	EncryptionKey string
 }
 

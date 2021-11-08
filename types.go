@@ -33,3 +33,11 @@ type Database struct {
 	// Pool is the connection pool
 	Pool *sql.DB
 }
+
+type redisConfig struct {
+	host     string
+	password string
+
+	// prefix will add a prefix to a key to prevent name conflicts between multiple applications
+	prefix string
+}

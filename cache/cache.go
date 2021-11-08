@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 
 	"github.com/gomodule/redigo/redis"
@@ -44,22 +46,166 @@ func (c *RedisCache) Has(str string) (bool, error) {
 	return ok, nil
 }
 
-func (c *RedisCache) Get(str string) (interface{}, error) {
-	return "", nil
+// encode serializes an item before storing it in cache
+func encode(item Entry) ([]byte, error) {
+	b := bytes.Buffer{}
+	e := gob.NewEncoder(&b)
+	err := e.Encode(item)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.Bytes(), nil
 }
 
-func (c *RedisCache) Set(str string, data interface{}, ttl ...int) error {
+// decode unserializes an item after retrieving it from cache
+func decode(str string) (Entry, error) {
+	item := Entry{}
+	b := bytes.Buffer{}
+	b.Write([]byte(str))
+
+	d := gob.NewDecoder(&b)
+	err := d.Decode(&item)
+	if err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
+func (c *RedisCache) Get(str string) (interface{}, error) {
+	key := fmt.Sprintf("%s:%s", c.Prefix, str)
+	conn := c.Conn.Get()
+	defer conn.Close()
+
+	// get item from cache
+	cacheEntry, err := redis.Bytes(conn.Do("GET", key))
+	if err != nil {
+		return nil, err
+	}
+
+	// unserialize entry
+	decoded, err := decode(string(cacheEntry))
+	if err != nil {
+		return nil, err
+	}
+
+	// get item
+	item := decoded[key]
+
+	return item, nil
+}
+
+func (c *RedisCache) Set(str string, value interface{}, ttl ...int) error {
+	key := fmt.Sprintf("%s:%s", c.Prefix, str)
+	conn := c.Conn.Get()
+	defer conn.Close()
+
+	// store key-value pair in Entry map
+	entry := Entry{key: value}
+
+	// serialize entry before storing to redis
+	encoded, err := encode(entry)
+	if err != nil {
+		return err
+	}
+
+	// add to redis cache
+	if len(ttl) > 0 {
+		// expiry
+		// SETEX is set with expiry
+		_, err := conn.Do("SETEX", key, ttl[0], string(encoded))
+		if err != nil {
+			return err
+		}
+	} else {
+		// no expiry
+		_, err := conn.Do("SET", key, string(encoded))
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (c *RedisCache) Forget(str string) error {
+	key := fmt.Sprintf("%s:%s", c.Prefix, str)
+	conn := c.Conn.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("DEL", key)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
+// EmptyByMatch removes entrie from cache based on a pattern
 func (c *RedisCache) EmptyByMatch(str string) error {
+	key := fmt.Sprintf("%s:%s", c.Prefix, str)
+	conn := c.Conn.Get()
+	defer conn.Close()
+
+	keys, err := c.getkeys(key)
+	if err != nil {
+		return err
+	}
+
+	// forget keys
+	for _, x := range keys {
+		err := c.Forget(x)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (c *RedisCache) Empty() error {
+	key := fmt.Sprintf("%s:", c.Prefix)
+	conn := c.Conn.Get()
+	defer conn.Close()
+
+	keys, err := c.getkeys(key)
+	if err != nil {
+		return err
+	}
+
+	for _, x := range keys {
+		err = c.Forget(x)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func (c *RedisCache) getkeys(pattern string) ([]string, error) {
+	conn := c.Conn.Get()
+	defer conn.Close()
+
+	iter := 0
+	var keys []string
+
+	for {
+		arr, err := redis.Values(conn.Do("SCAN", iter, "MATCH", fmt.Sprintf("%s*", pattern)))
+		if err != nil {
+			return keys, err
+		}
+
+		// iterate to next entry
+		iter, _ = redis.Int(arr[0], nil)   // arr[0] holds key
+		k, _ := redis.Strings(arr[1], nil) // arr[1] holds value
+		keys = append(keys, k...)
+
+		if iter == 0 {
+			break
+		}
+	}
+
+	return keys, nil
 }

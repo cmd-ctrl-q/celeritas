@@ -15,6 +15,7 @@ require (
 require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/gertd/go-pluralize v0.1.7 // indirect
+	github.com/gomodule/redigo v1.8.5 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 )
 

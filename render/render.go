@@ -10,6 +10,7 @@ import (
 
 	"github.com/CloudyKit/jet/v6"
 	"github.com/alexedwards/scs/v2"
+	"github.com/justinas/nosurf"
 )
 
 type Render struct {
@@ -47,8 +48,10 @@ type TemplateData struct {
 
 // defaultData modifies data from TemplateData based on data from Request
 func (c *Render) defaultData(td *TemplateData, r *http.Request) *TemplateData {
+	// pass data to request
 	td.Secure = c.Secure
 	td.ServerName = c.ServerName
+	td.CSRFToken = nosurf.Token(r)
 	td.Port = c.Port
 	if c.Session.Exists(r.Context(), "userID") {
 		// user is authenticated

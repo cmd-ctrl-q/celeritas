@@ -24,6 +24,8 @@ const version = "1.0.0"
 
 var myRedisCache *cache.RedisCache
 var myBadgerCache *cache.BadgerCache
+var redisPool *redis.Pool
+var badgerConn *badger.DB
 
 type Celeritas struct {
 	AppName string
@@ -103,15 +105,21 @@ func (c *Celeritas) New(rootPath string) error {
 		}
 	}
 
+	// set scheduler
+	scheduler := cron.New()
+	c.Scheduler = scheduler
+
 	// connec to a cache
 	if os.Getenv("CACHE") == "redis" || os.Getenv("SESSION_TYPE") == "redis" {
 		myRedisCache = c.createClientRedisCache()
 		c.Cache = myRedisCache
+		redisPool = myRedisCache.Conn
 	}
 
 	if os.Getenv("CACHE") == "badger" {
 		myBadgerCache = c.createClientBadgerCache()
 		c.Cache = myBadgerCache
+		badgerConn = myBadgerCache.Conn
 
 		// schedule garbage collection once a day
 		_, err = c.Scheduler.AddFunc("@daily", func() {
@@ -215,7 +223,19 @@ func (c *Celeritas) ListenAndServe() {
 		WriteTimeout: 600 * time.Second,
 	}
 
-	defer c.DB.Pool.Close()
+	// close db client when app quits
+	if c.DB.Pool != nil {
+		defer c.DB.Pool.Close()
+	}
+
+	// close cache clients when app quits
+	if redisPool != nil {
+		defer redisPool.Close()
+	}
+
+	if badgerConn != nil {
+		defer badgerConn.Close()
+	}
 
 	c.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
 	err := srv.ListenAndServe()

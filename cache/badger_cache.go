@@ -13,7 +13,10 @@ type BadgerCache struct {
 
 func (b *BadgerCache) Has(str string) (bool, error) {
 	_, err := b.Get(str)
-	if err != nil {
+	if err == badger.ErrKeyNotFound {
+		// false is same as key not found
+		return false, nil
+	} else if err != nil {
 		return false, err
 	}
 

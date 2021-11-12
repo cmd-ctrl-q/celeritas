@@ -13,21 +13,38 @@ require (
 )
 
 require (
+	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
 	github.com/alexedwards/scs/redisstore v0.0.0-20211102093144-4fbbc167f2c1 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
 	github.com/alicebob/miniredis/v2 v2.16.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
+	github.com/cespare/xxhash v1.1.0 // indirect
+	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/dgraph-io/badger/v3 v3.2103.2 // indirect
+	github.com/dgraph-io/ristretto v0.1.0 // indirect
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/gertd/go-pluralize v0.1.7 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gomodule/redigo v1.8.5 // indirect
+	github.com/google/flatbuffers v2.0.0+incompatible // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/justinas/nosurf v1.1.1 // indirect
+	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
+	go.opencensus.io v0.23.0 // indirect
+	golang.org/x/net v0.0.0-20211013171255-e13a2654a71e // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 )
 
 require (
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/alexedwards/scs/mysqlstore v0.0.0-20211102093144-4fbbc167f2c1
 	github.com/alexedwards/scs/postgresstore v0.0.0-20211102093144-4fbbc167f2c1
+	github.com/dgraph-io/badger v1.6.2
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-migrate/migrate/v4 v4.15.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect

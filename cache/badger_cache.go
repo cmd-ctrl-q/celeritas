@@ -130,6 +130,7 @@ func (b *BadgerCache) emptyByMatch(str string) error {
 		opts.PrefetchValues = false
 		// create iterator with the options
 		it := txn.NewIterator(opts)
+		defer it.Close()
 
 		keysForDelete := make([][]byte, 0, collectSize)
 		keysCollected := 0

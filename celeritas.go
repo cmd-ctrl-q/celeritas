@@ -13,14 +13,17 @@ import (
 	"github.com/cmd-ctrl-q/celeritas/cache"
 	"github.com/cmd-ctrl-q/celeritas/render"
 	"github.com/cmd-ctrl-q/celeritas/session"
+	"github.com/dgraph-io/badger"
 	"github.com/go-chi/chi/v5"
 	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
+	"github.com/robfig/cron/v3"
 )
 
 const version = "1.0.0"
 
 var myRedisCache *cache.RedisCache
+var myBadgerCache *cache.BadgerCache
 
 type Celeritas struct {
 	AppName string
@@ -45,6 +48,9 @@ type Celeritas struct {
 	// Encryption Encryption
 	EncryptionKey string
 	Cache         cache.Cache
+
+	// Scheduler schedules jobs like garbage collecting
+	Scheduler *cron.Cron
 }
 
 type config struct {
@@ -101,6 +107,19 @@ func (c *Celeritas) New(rootPath string) error {
 	if os.Getenv("CACHE") == "redis" || os.Getenv("SESSION_TYPE") == "redis" {
 		myRedisCache = c.createClientRedisCache()
 		c.Cache = myRedisCache
+	}
+
+	if os.Getenv("CACHE") == "badger" {
+		myBadgerCache = c.createClientBadgerCache()
+		c.Cache = myBadgerCache
+
+		// schedule garbage collection once a day
+		_, err = c.Scheduler.AddFunc("@daily", func() {
+			_ = myBadgerCache.Conn.RunValueLogGC(0.7)
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	c.InfoLog = infoLog
@@ -234,6 +253,13 @@ func (c *Celeritas) createRenderer() {
 	c.Render = &myRenderer
 }
 
+func (c *Celeritas) createClientBadgerCache() *cache.BadgerCache {
+	cacheClient := cache.BadgerCache{
+		Conn: c.createBadgerPool(),
+	}
+	return &cacheClient
+}
+
 func (c *Celeritas) createClientRedisCache() *cache.RedisCache {
 	cacheClient := cache.RedisCache{
 		Conn:   c.createRedisPool(),
@@ -241,6 +267,15 @@ func (c *Celeritas) createClientRedisCache() *cache.RedisCache {
 	}
 
 	return &cacheClient
+}
+
+func (c *Celeritas) createBadgerPool() *badger.DB {
+	db, err := badger.Open(badger.DefaultOptions(c.RootPath + "/tmp/badger"))
+	if err != nil {
+		return nil
+	}
+
+	return db
 }
 
 func (c *Celeritas) createRedisPool() *redis.Pool {

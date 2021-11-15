@@ -86,8 +86,6 @@ func (m *Mail) ChooseAPI(msg Message) error {
 	default:
 		return fmt.Errorf("unknown api %s; only mailgun, sparkpost, or sendgrid accepted", m.API)
 	}
-
-	return nil
 }
 
 func (m *Mail) SendUsingAPI(msg Message, transport string) error {

@@ -3,9 +3,12 @@ package mailer
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"text/template"
 	"time"
 
+	apimail "github.com/ainsleyclark/go-mail"
 	"github.com/vanng822/go-premailer/premailer"
 	mail "github.com/xhit/go-simple-mail/v2"
 )
@@ -64,9 +67,109 @@ func (m *Mail) ListenForMail() {
 	}
 }
 
+// Send message to mail channel
 func (m *Mail) Send(msg Message) error {
 	// TODO: using smtp (legacy) or api (like mail gun)?
+	if len(m.API) > 0 && len(m.APIKey) > 0 && len(m.APIUrl) > 0 && m.API != "smtp" {
+		// send using api
+		m.ChooseAPI(msg)
+	} else {
+		// send using smtp
+	}
 	return m.SendSMTPMessage(msg)
+}
+
+func (m *Mail) ChooseAPI(msg Message) error {
+	switch m.API {
+	case "mailgun", "sparkpost", "sendgrid":
+		return m.SendUsingAPI(msg, m.API)
+	default:
+		return fmt.Errorf("unknown api %s; only mailgun, sparkpost, or sendgrid accepted", m.API)
+	}
+
+	return nil
+}
+
+func (m *Mail) SendUsingAPI(msg Message, transport string) error {
+	if msg.From == "" {
+		msg.From = m.FromAddress
+	}
+
+	if msg.FromName == "" {
+		msg.FromName = m.FromName
+	}
+
+	// api mail package
+	cfg := apimail.Config{
+		URL:         m.APIUrl,
+		APIKey:      m.APIKey,
+		Domain:      m.Domain,
+		FromAddress: msg.From,
+		FromName:    msg.FromName,
+	}
+
+	// get driver to send msg
+	driver, err := apimail.NewClient(transport, cfg)
+	if err != nil {
+		return err
+	}
+
+	// generate plain text and formatted message
+	formattedMessage, err := m.buildHTMLMessage(msg)
+	if err != nil {
+		return err
+	}
+
+	plainMessage, err := m.buildPlainTextMessage(msg)
+	if err != nil {
+		return err
+	}
+
+	// create transmission
+	tx := &apimail.Transmission{
+		Recipients: []string{msg.To},
+		Subject:    msg.Subject,
+		HTML:       formattedMessage,
+		PlainText:  plainMessage,
+	}
+
+	// add attachments
+	err = m.addAPIAttachments(msg, tx)
+	if err != nil {
+		return err
+	}
+
+	_, err = driver.Send(tx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Mail) addAPIAttachments(msg Message, tx *apimail.Transmission) error {
+	if len(msg.Attachments) > 0 {
+		var attachments []apimail.Attachment
+
+		for _, x := range msg.Attachments {
+			var att apimail.Attachment
+			content, err := ioutil.ReadFile(x)
+			if err != nil {
+				return err
+			}
+
+			// get file name
+			fileName := filepath.Base(x)
+			att.Bytes = content
+			att.Filename = fileName
+
+			attachments = append(attachments, att)
+		}
+
+		tx.Attachments = attachments
+	}
+
+	return nil
 }
 
 func (m *Mail) SendSMTPMessage(msg Message) error {

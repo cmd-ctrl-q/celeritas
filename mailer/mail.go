@@ -72,9 +72,7 @@ func (m *Mail) Send(msg Message) error {
 	// TODO: using smtp (legacy) or api (like mail gun)?
 	if len(m.API) > 0 && len(m.APIKey) > 0 && len(m.APIUrl) > 0 && m.API != "smtp" {
 		// send using api
-		m.ChooseAPI(msg)
-	} else {
-		// send using smtp
+		return m.ChooseAPI(msg)
 	}
 	return m.SendSMTPMessage(msg)
 }

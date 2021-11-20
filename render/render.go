@@ -44,6 +44,9 @@ type TemplateData struct {
 	Port       string
 	ServerName string
 	Secure     bool
+	Error      string
+	// Flash is a message that gets sent to the session only once
+	Flash string
 }
 
 // defaultData modifies data from TemplateData based on data from Request

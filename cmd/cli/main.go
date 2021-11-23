@@ -25,6 +25,11 @@ func main() {
 	switch arg1 {
 	case "help":
 		showHelp()
+	case "new":
+		if arg2 == "" {
+			exitGraceFully(errors.New("new requires an application name"))
+		}
+		doNew(arg2)
 	case "version":
 		color.Yellow("Application version: " + version)
 	case "migrate":

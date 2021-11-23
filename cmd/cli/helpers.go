@@ -9,20 +9,23 @@ import (
 )
 
 // setup populates the Celeritas type
-func setup() {
-	err := godotenv.Load()
-	if err != nil {
-		exitGraceFully(err)
-	}
+func setup(arg1, arg2 string) {
+	if arg1 != "new" && arg1 != "vesion" && arg1 != "help" {
 
-	// get root path
-	path, err := os.Getwd()
-	if err != nil {
-		exitGraceFully(err)
-	}
+		err := godotenv.Load()
+		if err != nil {
+			exitGraceFully(err)
+		}
 
-	cel.RootPath = path
-	cel.DB.DataType = os.Getenv("DATABASE_TYPE")
+		// get root path
+		path, err := os.Getwd()
+		if err != nil {
+			exitGraceFully(err)
+		}
+
+		cel.RootPath = path
+		cel.DB.DataType = os.Getenv("DATABASE_TYPE")
+	}
 }
 
 // getDSN returns a dsn in the correct format

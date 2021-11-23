@@ -29,3 +29,4 @@ Makefile
 .env
 testdata
 docs.md
+dist

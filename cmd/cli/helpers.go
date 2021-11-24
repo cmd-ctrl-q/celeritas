@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -99,7 +98,7 @@ func updateSourceFiles(path string, fi os.FileInfo, err error) error {
 	// have matching file
 	if matched {
 		// read file contents
-		read, err := ioutil.ReadFile(path)
+		read, err := os.ReadFile(path)
 		if err != nil {
 			exitGraceFully(err)
 		}
@@ -107,7 +106,7 @@ func updateSourceFiles(path string, fi os.FileInfo, err error) error {
 		newContents := strings.Replace(string(read), "myapp", appURL, -1)
 
 		// write the changed file
-		err = ioutil.WriteFile(path, []byte(newContents), 0)
+		err = os.WriteFile(path, []byte(newContents), 0)
 		if err != nil {
 			exitGraceFully(err)
 		}

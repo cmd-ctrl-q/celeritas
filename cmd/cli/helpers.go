@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
@@ -74,4 +77,49 @@ func showHelp() {
 	make session 		- creates a table in the database as a session store
 	make mail <name> 	- creates two starter mail templates in the mail directory
 	`)
+}
+
+func updateSourceFiles(path string, fi os.FileInfo, err error) error {
+	// check for error
+	if err != nil {
+		return err
+	}
+
+	// check if current file is directory
+	if fi.IsDir() {
+		return nil
+	}
+
+	// only check go files
+	matched, err := filepath.Match("*.go", fi.Name())
+	if err != nil {
+		return err
+	}
+
+	// have matching file
+	if matched {
+		// read file contents
+		read, err := ioutil.ReadFile(path)
+		if err != nil {
+			exitGraceFully(err)
+		}
+
+		newContents := strings.Replace(string(read), "myapp", appURL, -1)
+
+		// write the changed file
+		err = ioutil.WriteFile(path, []byte(newContents), 0)
+		if err != nil {
+			exitGraceFully(err)
+		}
+	}
+
+	return nil
+}
+
+func updateSource() {
+	// walk entire project folder and subfolders
+	err := filepath.Walk(".", updateSourceFiles)
+	if err != nil {
+		exitGraceFully(err)
+	}
 }

@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/fatih/color"
@@ -40,8 +42,59 @@ func doNew(appName string) {
 	}
 
 	// create a ready-to-go .env file
+	color.Yellow("\tCreating .env file...")
+	data, err := templateFS.ReadFile("templates/env.txt")
+	if err != nil {
+		exitGraceFully(err)
+	}
+
+	env := string(data)
+	env = strings.ReplaceAll(env, "${APP_NAME}", appName)
+	env = strings.ReplaceAll(env, "${KEY}", cel.RandomString(32))
+	err = copyDataToFile([]byte(env), fmt.Sprintf("./%s/.env", appName))
+	if err != nil {
+		exitGraceFully(err)
+	}
 
 	// create a makefile (linux|windows|unix)
+	if runtime.GOOS == "windows" {
+		source, err := os.Open(fmt.Sprintf("./%s/Makefile.windows", appName))
+		if err != nil {
+			exitGraceFully(err)
+		}
+		defer source.Close()
+
+		dst, err := os.Create(fmt.Sprintf("./%s/Makefile", appName))
+		if err != nil {
+			exitGraceFully(err)
+		}
+		defer dst.Close()
+
+		_, err = io.Copy(dst, source)
+		if err != nil {
+			exitGraceFully(err)
+		}
+
+	} else {
+		source, err := os.Open(fmt.Sprintf("./%s/Makefile.mac", appName))
+		if err != nil {
+			exitGraceFully(err)
+		}
+		defer source.Close()
+
+		dst, err := os.Create(fmt.Sprintf("./%s/Makefile", appName))
+		if err != nil {
+			exitGraceFully(err)
+		}
+		defer dst.Close()
+
+		_, err = io.Copy(dst, source)
+		if err != nil {
+			exitGraceFully(err)
+		}
+	}
+	_ = os.Remove("./" + appName + "/Makefile.mac")
+	_ = os.Remove("./" + appName + "/Makefile.windows")
 
 	// update the go.mod file
 
